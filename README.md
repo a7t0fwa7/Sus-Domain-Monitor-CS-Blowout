@@ -1,112 +1,62 @@
-# Suspicious Domains Monitoring
+# Domain Monitoring Script
 
-Python script designed to automate the process of updating a list of suspicious domains related to the recent CrowdStrike outage. The script periodically checks multiple sources for new domains and updates a local list to help organizations monitor and block malicious activities. Newly added domains are highlighted in green for easy identification.
+This script monitors newly registered domains for any that contain specific keywords related to the CrowdStrike incident. It uses the WhoisXML API to fetch newly registered domains and checks them for malicious activity.
 
-## Table of Contents
+## Prerequisites
 
-- [Background](#background)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
+1. **Python 3.x**: Ensure you have Python 3.x installed on your system.
+2. **Required Libraries**: Install the necessary Python libraries using pip.
 
-## Background
+```bash
+pip install python-whois termcolor apscheduler requests
+```
 
-On July 19, 2024, a faulty software update from CrowdStrike caused a global IT outage, affecting numerous services worldwide. Malicious actors have since been exploiting this situation by using suspicious domains for phishing and other cyberattacks. This script helps in identifying and updating these domains to mitigate risks.
+## Getting the WhoisXML API Key
 
-## Features
+1. **Sign Up**: Go to the [WhoisXML API website](https://www.whoisxmlapi.com/) and sign up for an account.
+2. **API Key**: After signing up, navigate to the API section of your account to obtain your API key.
+3. **Subscription**: Ensure you have an active subscription that allows access to the Newly Registered & Just-Expired Domains Database. Note that this is a paid service, and pricing plans are available on their [pricing page](https://whois.whoisxmlapi.com/pricing).
 
-- **Automated Updates**: Periodically fetches and updates the list of suspicious domains from multiple sources.
-- **Multiple Sources**: Checks various reliable sources for the latest information.
-- **Local Storage**: Stores the updated list of domains locally in a JSON file.
-- **Easy Configuration**: Simple to configure and extend with additional sources.
-- **Color Differentiation**: Highlights newly added domains in green for easy identification.
+## Configuration
 
-## Installation
-
-To install and set up the script, follow these steps:
-
-1. **Clone the Repository**:
-
-   ```sh
-   git clone https://github.com/yourusername/suspicious-domains-monitoring.git
-   cd suspicious-domains-monitoring
-   ```
-2. **Create a Virtual Environment**:
-
-   ```sh
-   python -m venv myenv
-   ```
-3. **Activate the Virtual Environment**:
-
-   - **On Windows**:
-     ```sh
-     myenv\Scripts\activate
-     ```
-   - **On macOS and Linux**:
-     ```sh
-     source myenv/bin/activate
-     ```
-4. **Install Dependencies**:
-
-   ```sh
-   pip install requests beautifulsoup4
-   ```
+1. **API Key**: Replace the placeholder `'YOUR_WHOISXML_API_KEY'` in the script with your actual API key from WhoisXML API.
 
 ## Usage
 
-To run the script, execute the following command:
+1. **Clone the Repository**: Clone this repository to your local machine.
 
-```sh
-python main.py
+```bash
+git clone https://github.com/your-repo/domain-monitoring-script.git
+cd domain-monitoring-script
 ```
 
-Python script designed to automate the process of updating a list of suspicious domains related to the recent CrowdStrike outage. The script periodically checks multiple sources for new domains and updates a local list to help organizations monitor and block malicious activities. Newly added domains are highlighted in green for easy identification.
+2. **Run the Script**: Execute the script to start monitoring domains.
 
-## Table of Contents
-
-- [Background](#background)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Background
-
-On July 19, 2024, a faulty software update from CrowdStrike caused a global IT outage, affecting numerous services worldwide. Malicious actors have since been exploiting this situation by using suspicious domains for phishing and other cyberattacks. This script helps in identifying and updating these domains to mitigate risks.
-
-## Features
-
-- **Automated Updates**: Periodically fetches and updates the list of suspicious domains from multiple sources.
-- **Multiple Sources**: Checks various reliable sources for the latest information.
-- **Local Storage**: Stores the updated list of domains locally in a JSON file.
-- **Easy Configuration**: Simple to configure and extend with additional sources.
-- **Color Differentiation**: Highlights newly added domains in green for easy identification.
-
-## Installation
-
-To install and set up the script, follow these steps:
-
-1. **Clone the Repository**:
-
-   ```sh
-   git clone https://github.com/yourusername/suspicious-domains-monitoring.git
-   cd suspicious-domains-monitoring
-   ```
-2. **Install Dependencies**:
-
-   ```sh
-   pip install requests beautifulsoup4
-   ```
-
-## Usage
-
-To run the script, execute the following command:
-
-```sh
-python update_suspicious_domains.py
+```bash
+python monitor_domains.py
 ```
+
+The script will:
+- Fetch newly registered domains every hour.
+- Check if any of the domains contain specified keywords (e.g., "crowdstrike", "crowd", "bsod", "fix", etc.).
+- Print any new suspicious domains to the console and save the results to a JSON file (`new_malicious_domains.json`).
+
+
+
+## Troubleshooting
+
+- **API Errors**: Ensure your API key is correct and you have an active subscription.
+- **Library Issues**: Make sure all required libraries are installed using the provided pip command.
+- **Network Issues**: Ensure your network allows outbound connections to the WhoisXML API.
+
+## License
+
+This project is licensed under the MIT License.
+```
+
+### Instructions for Analysts
+
+1. **Follow the Prerequisites**: Ensure Python 3.x is installed and required libraries are set up.
+2. **Obtain API Key**: Sign up on WhoisXML API, get your API key, and ensure you have the necessary subscription.
+3. **Configure the Script**: Replace the placeholder with your API key.
+4. **Run the Script**: Clone the repository and execute the script to start monitoring.

@@ -1,77 +1,74 @@
-import requests
-from bs4 import BeautifulSoup
 import json
-import os
-import time
+import whois
+import requests
+from termcolor import colored
+from apscheduler.schedulers.blocking import BlockingScheduler
 
-# List of source URLs containing suspicious domains
-SOURCE_URLS = [
-    "https://socradar.io/suspicious-domains-exploiting-the-recent-crowdstrike-outage/",
-    "https://www.crowdstrike.com/blog/technical-details-on-todays-outage/",
-    "https://www.cisa.gov/",
-    "https://www.cyber.gov.au/about-us/view-all-content/alerts-and-advisories/widespread-outages-relating-crowdstrike-software-update",
-    "https://krebsonsecurity.com/2024/07/global-microsoft-meltdown-tied-to-bad-crowstrike-update/",
-    "https://www.reddit.com/r/sysadmin/comments/1e76lqw/be_careful_with_responding_to_crowdstrike_outage/",
-    "https://techcrunch.com/2024/07/19/us-cyber-agency-cisa-says-malicious-hackers-are-taking-advantage-of-crowdstrike-outage/"
+# API configuration
+WHOISXML_API_KEY = 'YOUR_WHOISXML_API_KEY'
+NEW_DOMAINS_API_URL = f'https://newly-registered-domains.whoisxmlapi.com/api/v1?apiKey={WHOISXML_API_KEY}&since=1h'
+
+# Keywords to monitor
+keywords = [
+    "crowdstrike", "crowd", "falcon", "cs", "strike",
+    "bsod", "fix", "update", "helpdesk", "bluescreen", "outage", 
+    "recovery", "support", "claim", "bug", "fail", "oopsie", 
+    "token", "falcon-immed-update", "cloudtrail", "sinkhole", 
+    "recovery1", "failstrike", "winsstrike", "crowdpass",
+    "phishing", "scam", "malware", "ransomware", "breach", 
+    "hack", "cyberattack", "security", "incident", "compromised"
 ]
 
-# Local file to store the list of suspicious domains
-LOCAL_FILE = "suspicious_domains.json"
+# File to store the results
+output_file = "new_malicious_domains.json"
 
-def fetch_suspicious_domains():
-    domain_list = []
-    for url in SOURCE_URLS:
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
-                # Adjust the selector based on the actual HTML structure of each source
-                domains = soup.find_all('li')  # Example selector
-                domain_list.extend([domain.text.strip() for domain in domains if domain.text])
-            else:
-                print(f"Failed to fetch data from {url}")
-        except Exception as e:
-            print(f"Error fetching data from {url}: {e}")
-    return domain_list
-
-def load_local_domains():
+# Function to check domain creation date
+def check_domain(domain):
     try:
-        with open(LOCAL_FILE, 'r') as file:
-            return json.load(file)
-    except FileNotFoundError:
+        domain_info = whois.whois(domain)
+        creation_date = domain_info.creation_date
+        return creation_date
+    except Exception as e:
+        print(f"Error checking domain {domain}: {e}")
+        return None
+
+# Function to fetch newly registered domains
+def fetch_new_domains():
+    try:
+        response = requests.get(NEW_DOMAINS_API_URL)
+        response.raise_for_status()
+        data = response.json()
+        new_domains = [domain['domainName'] for domain in data['domainsList']]
+        return new_domains
+    except Exception as e:
+        print(f"Error fetching new domains: {e}")
         return []
 
-def save_local_domains(domains):
-    with open(LOCAL_FILE, 'w') as file:
-        json.dump(domains, file, indent=4)
+# Function to monitor domains
+def monitor_domains():
+    new_domains = {}
+    
+    # Check newly registered domains for keywords
+    recently_registered = fetch_new_domains()
+    for domain in recently_registered:
+        if any(keyword in domain for keyword in keywords):
+            creation_date = check_domain(domain)
+            if creation_date:
+                new_domains[domain] = str(creation_date)
+                print(colored(f"New domain with keyword detected: {domain} - Created on: {creation_date}", "yellow"))
+    
+    # Write results to JSON file
+    with open(output_file, "w") as f:
+        json.dump(new_domains, f, indent=4)
 
-def update_domains():
-    new_domains = fetch_suspicious_domains()
-    if new_domains:
-        local_domains = load_local_domains()
-        updated_domains = list(set(local_domains + new_domains))
-        save_local_domains(updated_domains)
-        print(f"Updated domains list with {len(new_domains)} new entries.")
-        print_formatted_domains(local_domains, new_domains)
-    else:
-        print("No new domains found.")
+    print(colored("Monitoring completed. Results saved to new_malicious_domains.json", "green"))
 
-def print_formatted_domains(existing_domains, new_domains):
-    # Create a colored output
-    formatted_domains = []
-    for domain in existing_domains:
-        if domain in new_domains:
-            # Format new domains with a green color
-            formatted_domains.append(f'\033[92m{domain}\033[0m')  # Green
-        else:
-            formatted_domains.append(domain)
+# Scheduler setup
+scheduler = BlockingScheduler()
+scheduler.add_job(monitor_domains, 'interval', hours=1)
 
-    # Print formatted domains list
-    for domain in formatted_domains:
-        print(domain)
-
+# Run the scheduler
 if __name__ == "__main__":
-    while True:
-        update_domains()
-        # Run the update every hour (3600 seconds)
-        time.sleep(3600)
+    print(colored("Starting domain monitoring script...", "green"))
+    monitor_domains()  # Initial run
+    scheduler.start()
