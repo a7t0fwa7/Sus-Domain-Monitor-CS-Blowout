@@ -1,6 +1,8 @@
 import json
 import whois
 import requests
+import signal
+import sys
 from termcolor import colored
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -16,7 +18,9 @@ keywords = [
     "token", "falcon-immed-update", "cloudtrail", "sinkhole", 
     "recovery1", "failstrike", "winsstrike", "crowdpass",
     "phishing", "scam", "malware", "ransomware", "breach", 
-    "hack", "cyberattack", "security", "incident", "compromised"
+    "hack", "cyberattack", "security", "incident", "compromised",
+    "support", "login", "account", "verify", "secure", "payment",
+    "billing", "service", "contact", "info", "www"
 ]
 
 # File to store the results
@@ -63,12 +67,26 @@ def monitor_domains():
 
     print(colored("Monitoring completed. Results saved to new_malicious_domains.json", "green"))
 
+# Signal handler for graceful shutdown
+def signal_handler(sig, frame):
+    print(colored("Script interrupted by user. Exiting...", "red"))
+    sys.exit(0)
+
 # Scheduler setup
 scheduler = BlockingScheduler()
+
+# Add the job to the scheduler
 scheduler.add_job(monitor_domains, 'interval', hours=1)
+
+# Register the signal handler
+signal.signal(signal.SIGINT, signal_handler)
 
 # Run the scheduler
 if __name__ == "__main__":
     print(colored("Starting domain monitoring script...", "green"))
-    monitor_domains()  # Initial run
-    scheduler.start()
+    try:
+        monitor_domains()  # Initial run
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        print(colored("Script terminated by user.", "red"))
+        scheduler.shutdown()
