@@ -26,8 +26,8 @@ pip install python-whois termcolor apscheduler requests
 1. **Clone the Repository**: Clone this repository to your local machine.
 
 ```bash
-git clone https://github.com/your-repo/domain-monitoring-script.git
-cd domain-monitoring-script
+git clone https://github.com/a7t0fwa7/Sus-Domain-Monitor-CS-Blowout.git
+cd Sus-Domain-Monitor-CS-Blowout
 ```
 
 2. **Run the Script**: Execute the script to start monitoring domains.
@@ -37,11 +37,10 @@ python monitor_domains.py
 ```
 
 The script will:
+
 - Fetch newly registered domains every hour.
 - Check if any of the domains contain specified keywords (e.g., "crowdstrike", "crowd", "bsod", "fix", etc.).
 - Print any new suspicious domains to the console and save the results to a JSON file (`new_malicious_domains.json`).
-
-
 
 ## Troubleshooting
 
@@ -52,6 +51,7 @@ The script will:
 ## License
 
 This project is licensed under the MIT License.
+
 ```
 
 ### Instructions for Analysts
@@ -60,3 +60,4 @@ This project is licensed under the MIT License.
 2. **Obtain API Key**: Sign up on WhoisXML API, get your API key, and ensure you have the necessary subscription.
 3. **Configure the Script**: Replace the placeholder with your API key.
 4. **Run the Script**: Clone the repository and execute the script to start monitoring.
+```
